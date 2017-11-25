@@ -12,6 +12,11 @@
 	var sampleStored = false;
 
 	var galootPopulationArray = [];
+	var completeGalootArray = [];
+
+	var meanWeightTotal = 0.0;
+	var meanCaresTotal = 0.0;
+
 	var sampleWeightArray = [];
 	var sampleProportionArray = [];
 	var samplePercentageWeightArray = [];
@@ -360,15 +365,49 @@
 					x: xAxisWeightDistribution,
 					y: distributionPercentageWeightArray,
 					type: 'bar',
+					name: 'Stored Means',
 					marker: {
 						color: '#0000FF'}
 			};
 
-			data3 = [trace3];
+var correctLine = {
+  x: [meanWeightTotal, meanWeightTotal],
+  y: [-100, 100],
+  mode: 'lines',
+	name: 'True Mean',
+	line: {
+    color: 'rgb(255, 165, 0)',
+    width: 1
+  },
+
+
+};
+
+var correctLine2 = {
+  x: [meanCaresTotal, meanCaresTotal],
+  y: [-100, 100],
+  mode: 'lines',
+	name: 'True Mean',
+	line: {
+    color: 'rgb(255, 165, 0)',
+    width: 1
+  },
+
+
+};
+
+//var data2 = [ trace1, correctLine ];
+
+			data3 = [trace3, correctLine];
 
 			Plotly.newPlot('weightPercentageTotal', data3 ,{
 				//Empirical Sampling Distribution for x̄
 				title:'Empirical Sampling Distribution for x̄',
+				showlegend: true,
+				legend: {
+    x: 0.05,
+    y: 1
+  },
 				xaxis: {
 					title: 'Weight (In Pounds)',
 					range: [2,29],
@@ -400,15 +439,21 @@
 				x: xAxisProportionDistribution,
 				y: distributionPercentageProportionArray,
 				type: 'bar',
+				name: 'Stored Means',
 				marker: {
 					color: '#0000FF'}
 			};
 //100% max
-			data4 = [trace4];
+			data4 = [trace4, correctLine2];
 
 			Plotly.newPlot('proportionPercentageTotal', data4 ,{
 				//Empirical Sampling Distribution for p̂
 				title:'Empirical Sampling Distribution for p̂',
+				showlegend: true,
+				legend: {
+    x: 0.05,
+    y: 1
+  },
 				xaxis: {
 					title: 'Proportion Caring For Offspring',
 					range: [0,1],
@@ -440,15 +485,21 @@
 				x: xAxisWeightDistributionNarrow,
 				y: distributionPercentageWeightArrayNarrow,
 				type: 'bar',
+				name: 'Stored Means',
 				marker: {
 					color: '#0000FF'}
 			};
 
-			data5 = [trace5];
+			data5 = [trace5, correctLine];
 // 100% max
 
 			Plotly.newPlot('weightPercentageNarrowed', data5 ,{
 				title:'Zoomed In Empirical Sampling Distribution for x̄',
+				showlegend: true,
+				legend: {
+    x: 0.05,
+    y: 1
+  },
 				xaxis: {
 					title: 'Weight (In Pounds)',
 					range: [12,14],
@@ -481,14 +532,20 @@
 				x: xAxisProportionDistributionNarrow,
 				y: distributionPercentageProportionArrayNarrow,
 				type: 'bar',
+				name: 'Stored Means',
 				marker: {
 					color: '#0000FF'}
 			};
 
-			data6 = [trace6];
+			data6 = [trace6, correctLine2];
 
 			Plotly.newPlot('proportionPercentageNarrowed', data6 ,{
 				title:'Zoomed In Empirical Sampling Distribution for p̂',
+				showlegend: true,
+				legend: {
+    x: 0.05,
+    y: 1
+  },
 				xaxis: {
 					title: 'Proportion Caring For Offspring',
 					range: [0.1,.3],
@@ -516,10 +573,6 @@
 
 		};
 
-		function updateSampleGraph(){
-
-		};
-
 		function updateSamplingDistributionGraphs(){
 
 		};
@@ -529,7 +582,20 @@
         // Here you can do whatever you want with the data
         //$(data).find('option').each(function() {
         //   alert($(this).text());
+
 				galootPopulationArray = csvToArray(data);
+				completeGalootArray = galootPopulationArray;
+
+
+
+
+				for(var i = 0; i<completeGalootArray.length;i++){
+					meanWeightTotal = meanWeightTotal + parseFloat(completeGalootArray[i][0])
+					meanCaresTotal = meanCaresTotal + parseFloat(completeGalootArray[i][1])
+				}
+
+				meanWeightTotal = meanWeightTotal / completeGalootArray.length
+				meanCaresTotal = meanCaresTotal / completeGalootArray.length
 
 				//getNewSample(mySampleSize);
 
@@ -541,7 +607,105 @@
 
     });
 
+		document.getElementById("biasChoices").onchange = function() {
+			updateSamplePopulation(document.getElementById("biasChoices").value)
+		}
+
 	});
+
+
+	function updateSamplePopulation(type){
+		//var galootPopulationArray = [];
+		//var completeGalootArray = [];
+
+		if(type == "noBias"){
+			clearData();
+			galootPopulationArray = completeGalootArray
+		}
+		if(type == "upperWeight"){
+			clearData();
+
+			var newSort = completeGalootArray
+			newSort.sort(function(a, b) {
+	var valueA, valueB;
+
+	valueA = a[0];
+	valueB = b[0];
+
+
+	return valueA - valueB
+	});
+
+	galootPopulationArray = []
+	for(var i = 0; i < Math.ceil(newSort.length * .75); i++){
+	galootPopulationArray.push(newSort[i])
+	}
+
+
+
+		}
+		if(type == "lowerWeight"){
+			clearData();
+			var newSort = completeGalootArray
+			newSort.sort(function(a, b) {
+				var valueA, valueB;
+
+				valueA = a[0];
+				valueB = b[0];
+
+
+				return valueA - valueB
+	});
+	galootPopulationArray = []
+	for(var i = Math.ceil(newSort.length * .25); i < newSort.length; i++){
+	galootPopulationArray.push(newSort[i])
+	}
+
+	}
+
+		if(type == "upperCares"){
+			clearData();
+
+			var newSort = completeGalootArray
+			newSort.sort(function(a, b) {
+				var valueA, valueB;
+
+				valueA = a[1];
+				valueB = b[1];
+
+
+				return valueA - valueB
+	});
+
+	galootPopulationArray = []
+	for(var i = 0; i < Math.ceil(newSort.length * .75); i++){
+	galootPopulationArray.push(newSort[i])
+	}
+
+		}
+		if(type == "lowerCares"){
+			clearData();
+			var newSort = completeGalootArray
+			newSort.sort(function(a, b) {
+				var valueA, valueB;
+
+				valueA = a[1];
+				valueB = b[1];
+
+
+				return valueA - valueB
+	});
+
+	galootPopulationArray = []
+	for(var i = Math.ceil(newSort.length * .25); i < newSort.length; i++){
+	galootPopulationArray.push(newSort[i])
+	}
+
+		}
+
+		console.log(galootPopulationArray)
+
+	};
 
 
 		var drawASample = function() {
@@ -695,6 +859,7 @@
 
 			$("#thirdHeader").html('<b>Weight</b>');
 			redrawEmpericalTable();
+			redrawFirstGraphs();
 		}
 
 		function switchOffspring(){
@@ -711,6 +876,7 @@
 
 			$("#thirdHeader").html('<b>Cares For Offspring</b>');
 			redrawEmpericalTable();
+			redrawFirstGraphs()
 		}
 
 		function storeToTable() {
@@ -791,6 +957,8 @@
 				//Plotly.restyle('weightPercentageTotal', 'x', [xAxisWeightDistribution]);
 				Plotly.restyle('weightPercentage', 'y', [samplePercentageWeightArray]);
 
+				console.log(samplePercentageWeightArray)
+
 			}
 			else {
 				Plotly.relayout('proportionPercentage', update);
@@ -798,7 +966,7 @@
 				//Plotly.restyle('proportionPercentageTotal', 'x', [xAxisProportionDistribution]);
 				Plotly.restyle('proportionPercentage', 'y', [samplePercentageProportionArray]);
 
-
+				console.log(samplePercentageProportionArray)
 			}
 
 					}
@@ -806,7 +974,41 @@
 		function redrawSampleGraphs() {
 
 
-			update = weightDisplayed ? {'xaxis.range': [arrayMin(xAxisWeightDistributionNarrow)-.5, arrayMax(xAxisWeightDistributionNarrow)+.5], 'yaxis.range[1]': maxYNWeight} : {'xaxis.range': [arrayMin(xAxisProportionDistributionNarrow)-.05, arrayMax(xAxisProportionDistributionNarrow) + .05],'yaxis.range[1]': maxYNProportion};
+			if(weightDisplayed){
+				if(arrayMin(xAxisWeightDistributionNarrow) > meanWeightTotal){
+					update = {'xaxis.range': [meanWeightTotal-.5, arrayMax(xAxisWeightDistributionNarrow)+.5], 'yaxis.range[1]': maxYNWeight};
+					console.log("w1")
+				}
+				else if(arrayMax(xAxisWeightDistributionNarrow) < meanWeightTotal){
+					update = {'xaxis.range': [arrayMin(xAxisWeightDistributionNarrow)-.5, meanWeightTotal+.5], 'yaxis.range[1]': maxYNWeight};
+					console.log("w2")
+				}
+
+				else{
+					update = {'xaxis.range': [arrayMin(xAxisWeightDistributionNarrow)-.5, arrayMax(xAxisWeightDistributionNarrow)+.5], 'yaxis.range[1]': maxYNWeight};
+					console.log("w3")
+				}
+
+			}
+			else{ // cares for is displayed
+				if(arrayMin(xAxisProportionDistributionNarrow) > meanCaresTotal){
+					update = {'xaxis.range': [meanCaresTotal-.05, arrayMax(xAxisProportionDistributionNarrow) + .05],'yaxis.range[1]': maxYNProportion};
+					console.log("c1")
+				}
+
+				else if(arrayMax(xAxisProportionDistributionNarrow) < meanCaresTotal){
+					update = {'xaxis.range': [arrayMin(xAxisProportionDistributionNarrow)-.05, meanCaresTotal + .05],'yaxis.range[1]': maxYNProportion};
+					console.log("c2")
+				}
+
+				else{
+					update = {'xaxis.range': [arrayMin(xAxisProportionDistributionNarrow)-.05, arrayMax(xAxisProportionDistributionNarrow) + .05],'yaxis.range[1]': maxYNProportion};
+					console.log("c3")
+				}
+			}
+
+
+
 			update2 = weightDisplayed ? {'yaxis.range[1]': maxYWeight} : {'yaxis.range[1]': maxYProportion};
 
 			var widthsForWColumns = Array(distributionPercentageWeightArray.length).fill(.8);
@@ -814,13 +1016,16 @@
 			var widthsForWNColumns = Array(distributionPercentageWeightArrayNarrow.length).fill(.08);
 			var widthsForPNColumns = Array(distributionPercentageProportionArrayNarrow.length).fill(.008);
 
+			lineX = weightDisplayed ? [meanWeightTotal, meanWeightTotal] : [meanCaresTotal, meanCaresTotal];
+			lineY= [-100, 100];
+
 			if(weightDisplayed){
 
-				Plotly.restyle('weightPercentageTotal', 'x', [xAxisWeightDistribution]);
-				Plotly.restyle('weightPercentageTotal', 'y', [distributionPercentageWeightArray]);
+				Plotly.restyle('weightPercentageTotal', 'x', [xAxisWeightDistribution, lineX]);
+				Plotly.restyle('weightPercentageTotal', 'y', [distributionPercentageWeightArray, lineY]);
 
-				Plotly.restyle('weightPercentageNarrowed', 'x', [xAxisWeightDistributionNarrow]);
-				Plotly.restyle('weightPercentageNarrowed', 'y', [distributionPercentageWeightArrayNarrow]);
+				Plotly.restyle('weightPercentageNarrowed', 'x', [xAxisWeightDistributionNarrow, lineX]);
+				Plotly.restyle('weightPercentageNarrowed', 'y', [distributionPercentageWeightArrayNarrow, lineY]);
 
 				Plotly.restyle('weightPercentageTotal', 'width', [widthsForWColumns]);
 				Plotly.restyle('weightPercentageNarrowed', 'width', [widthsForWNColumns]);
@@ -831,11 +1036,11 @@
 			}
 			else {
 
-				Plotly.restyle('proportionPercentageTotal', 'x', [xAxisProportionDistribution]);
-				Plotly.restyle('proportionPercentageTotal', 'y', [distributionPercentageProportionArray]);
+				Plotly.restyle('proportionPercentageTotal', 'x', [xAxisProportionDistribution, lineX]);
+				Plotly.restyle('proportionPercentageTotal', 'y', [distributionPercentageProportionArray, lineY]);
 
-				Plotly.restyle('proportionPercentageNarrowed', 'x', [xAxisProportionDistributionNarrow]);
-				Plotly.restyle('proportionPercentageNarrowed', 'y', [distributionPercentageProportionArrayNarrow]);
+				Plotly.restyle('proportionPercentageNarrowed', 'x', [xAxisProportionDistributionNarrow, lineX]);
+				Plotly.restyle('proportionPercentageNarrowed', 'y', [distributionPercentageProportionArrayNarrow, lineY]);
 
 				Plotly.restyle('proportionPercentageTotal', 'width', [widthsForPColumns]);
 				Plotly.restyle('proportionPercentageNarrowed', 'width', [widthsForPNColumns]);
@@ -910,7 +1115,7 @@
 
 	<link async rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto+Slab:400,300,200,100&subset=latin,latin-ext">
 
-	<title>Sampling App</title>
+	<title>Sampling with Bias App</title>
 
 	<style>
 
@@ -1093,7 +1298,7 @@ h4{
 
 <body>
 
-	<h1> Random Sampling </h1>
+	<h1> Random Sampling with Bias </h1>
 
 	<div class="grey_box">
 		<center>
@@ -1126,8 +1331,22 @@ h4{
 				<p><i> A Galoot</i></p>
 			</div>
 			<div id="rightThird">
-				<p> <b>Step 3:</b> Click on "Draw a sample" to draw your first sample of Galoots. </p>
-				<p> <b>Step 4:</b> Click “Store result” to write the sample mean to the data table in the lower left. This also adds the sample mean to the empirical sampling distribution on the lower right, and draws a new random sample of the same size. </p>
+				<form action="">
+
+					<p style="margin-bottom: 0em;"> <b>Step 3:</b> Explore the effects of <span class="tooltip">biased sampling<span class="tooltiptext">Sampling bias results from flaws in the sampling process resulting in some segment of individuals in the population of interest having less chance (or no chance) of being selected for inclusion in the sample.</span></span> by <span class="tooltip">specifying the way<span class="tooltiptext">To see the impact of one of the pre-determined types of sampling bias, use the dropdown window to select a specific type of bias.</span></span> in which the bias will be present in the data.
+						<select id = "biasChoices" style="margin-bottom: 0em;">
+	   					<option value="noBias">No Bias</option>
+	   					<option value="upperWeight">Galoots that weigh the most (lbs) [~Upper 25%]</option>
+	   					<option value="lowerWeight">Galoots that weigh the least (lbs) [~Lower 25%]</option>
+	   					<option value="upperCares">Galoots that care for offsprings the most [~Upper 25%]</option>
+							<option value="lowerCares">Galoots that care for offsprings the least [~Lower 25%]</option>
+	 					</select>
+						</p>
+						<font size="-3">Note: Changing the settings in step 2 or step 3 will clear all previous results.</font>
+
+				</form>
+				<p> <b>Step 4:</b> Click on "Draw a sample" to draw your first sample of Galoots. </p>
+				<p> <b>Step 5:</b> Click “Store result” to write the sample mean to the data table in the lower left. This also adds the sample mean to the empirical sampling distribution on the lower right, and draws a new random sample of the same size. </p>
 				<p> Note: Step 4 can be repeated as many times as you like. The more data you add to the empirical sampling distribution, the more it will accurately represent the theoretical sampling distribution for the sample mean.</p>
 				<p> Anytime you want to start over you can either click on "Clear all data" or change either the variable or sample size.</p>
 			</div>
@@ -1199,7 +1418,7 @@ h4{
 			<br/>
 
 
-			 <center><input type="button" id="clearSamples" value="Clear all data." onclick=clearData()></center>
+			 <center><input type="button" class="button" id="clearSamples" value="Clear all data." onclick=clearData()></center>
 
 		 </div>
 	 	  <div id ="halfPageGraphs">
